@@ -93,3 +93,19 @@ export async function GET() {
 
   return NextResponse.json({ chats });
 }
+
+export async function DELETE(req: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { chatId } = await req.json();
+  if (!chatId) return NextResponse.json({ error: "Missing chatId" }, { status: 400 });
+
+  const chat = await prisma.chat.findFirst({ where: { id: chatId, userId: user.id } });
+  if (!chat) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  await prisma.message.deleteMany({ where: { chatId } });
+  await prisma.chat.delete({ where: { id: chatId } });
+
+  return NextResponse.json({ ok: true });
+}

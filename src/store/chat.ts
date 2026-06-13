@@ -25,6 +25,7 @@ interface ChatStore {
   updateLastMessage: (chatId: string, content: string) => void;
   setStreaming: (v: boolean) => void;
   updateChatTitle: (chatId: string, title: string) => void;
+  deleteChat: (chatId: string) => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -58,4 +59,10 @@ export const useChatStore = create<ChatStore>((set) => ({
     set((s) => ({
       chats: s.chats.map((c) => (c.id === chatId ? { ...c, title } : c)),
     })),
+  deleteChat: (chatId) =>
+    set((s) => {
+      const chats = s.chats.filter((c) => c.id !== chatId);
+      const activeChatId = s.activeChatId === chatId ? (chats[0]?.id ?? null) : s.activeChatId;
+      return { chats, activeChatId };
+    }),
 }));

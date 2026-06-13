@@ -1,6 +1,6 @@
 # Aria — AI-powered SaaS Workspace
 
-> A full-stack AI productivity platform where users can chat with Claude AI, generate content, and manage their workspace — built as a production-ready SaaS with authentication, streaming, and a polished UI.
+> Полноценная AI-платформа для продуктивности: чат с ИИ, генерация контента, управление рабочим пространством. Production-ready SaaS с аутентификацией, стримингом и полировкой UI.
 
 **Live:** https://aria-three-alpha.vercel.app · **GitHub:** https://github.com/subrosa5/aria
 
@@ -8,172 +8,239 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?style=flat-square&logo=tailwindcss)
 ![Prisma](https://img.shields.io/badge/Prisma-5-2d3748?style=flat-square&logo=prisma)
+![Groq](https://img.shields.io/badge/Groq-Llama_3.1-orange?style=flat-square)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel)
 
 ---
 
-## Features
+## Что сделано и исправлено
 
-### Landing Page
-- Animated hero section with gradient text and floating UI mockup
-- Feature grid with scroll-triggered animations (Framer Motion)
-- Pricing table (Free / Pro / Team) with highlighted plan
-- CTA sections and footer — fully responsive
+### ✅ Подключение Groq AI (реальный ИИ вместо demo-режима)
+- Интегрирован **Groq API** с моделью **Llama 3.1 8B Instant** (бесплатный тариф)
+- Установлен пакет `@ai-sdk/groq`, настроен `streamText` через Vercel AI SDK v6
+- API-ключ добавлен в переменные окружения Vercel
+- Чат теперь отдаёт реальные стриминговые ответы от LLM
 
-### Authentication
-- Email + password registration and login
-- JWT stored in **httpOnly cookies** (secure, XSS-proof)
-- Middleware-based route protection — unauthenticated users redirected to login
-- Password hashing with **bcryptjs** (cost factor 12)
-- Zod schema validation on all API inputs
+### ✅ Фикс: ИИ не отвечал в чате
+- **Проблема:** баг замыкания в `send()` — `activeChatId` захватывался как `null` в момент вызова функции. После `addChat()` устанавливал временный ID, но условие `activeChatId?.startsWith("temp-")` было `false`, и `updateLastMessage()` не находил нужный чат
+- **Решение:** введена локальная переменная `tempChatId`, которая независимо отслеживает временный ID чата и корректно подменяется на реальный после ответа сервера
 
-### AI Chat (Streaming)
-- Real-time **streaming responses** from Claude AI via SSE (Server-Sent Events)
-- Demo mode when no API key is set — works out of the box
-- Multi-chat support: create, switch between, and persist chat sessions
-- Chat history stored in PostgreSQL, loaded on page mount
-- Typing indicator with animated dots during streaming
-- Suggested prompts on empty chat state
-- Keyboard shortcut: Enter to send, Shift+Enter for new line
-- Auto-scroll to latest message
-- Auto-generated chat titles from first user message
+### ✅ Удаление чатов
+- Кнопка с иконкой корзины появляется при наведении на чат в сайдбаре (`opacity-0 group-hover:opacity-100`)
+- DELETE-запрос на `/api/chat` удаляет чат и все его сообщения из БД каскадно
+- Zustand-стор обновляется: удалённый чат исчезает из списка, активным становится следующий
 
-### Content Writer
-- 4 content types: **Blog Post**, **Email**, **Social Media**, **Code**
-- 5 tone options: Professional, Casual, Friendly, Persuasive, Informative
-- Animated skeleton loader during generation
-- One-click copy to clipboard with confirmation feedback
+### ✅ Переключатель языка EN / RU
+- Кнопка переключения встроена в **навбар лендинга** (между ссылками и CTA-кнопкой)
+- В **Sidebar** — кнопка над «Выйти», показывает текущий язык
+- На страницах **авторизации** — компактный toggle в правом углу
+- Выбор языка сохраняется в `localStorage` через Zustand `persist`
+- Исправлен баг: плавающий `fixed top-4 right-4` toggle перекрывал кнопку «Начать» на лендинге — убран из глобального layout
 
-### Dashboard
-- Personalized greeting
-- Stats cards: messages this month, generations, plan, active days
-- Free plan usage bar with visual progress indicator
-- Quick action cards linking to AI tools
+### ✅ Полный перевод интерфейса на русский язык
+Все страницы полностью переведены — ни одной английской надписи при выбранном RU:
 
-### Settings
-- Profile editor
-- Plan display with upgrade CTA
-- Security section
-
-### Architecture
-- **Next.js Middleware** protects all `/dashboard`, `/chat`, `/tools`, `/settings` routes
-- **Zustand** store manages chat state client-side (messages, streaming flag, active chat)
-- **Prisma Client singleton** prevents connection pool exhaustion in serverless
-- All API routes validate input with **Zod** before touching the database
-- SSE streaming with manual `ReadableStream` — no polling
-
----
-
-## Tech Stack
-
-| Layer | Technology |
+| Страница | Что переведено |
 |---|---|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript 5 |
-| Styling | Tailwind CSS v4 |
-| Animations | Framer Motion |
-| Icons | Lucide React |
-| State management | Zustand |
-| Validation | Zod |
-| Auth | JWT + bcryptjs + httpOnly cookies |
-| AI | Groq API — Llama 3.1 8B Instant (free tier) |
-| ORM | Prisma v5 |
-| Database | PostgreSQL (Neon serverless) |
-| Deployment | Vercel |
+| Лендинг | Навбар, hero-секция, фичи, тарифы, CTA, футер |
+| Авторизация (вход) | Заголовок, подзаголовок, поля, кнопки, ссылки |
+| Авторизация (регистрация) | Все поля, плейсхолдеры, кнопки, ссылки |
+| Дашборд | Приветствие, 4 стат-карточки, usage-бар с подстановкой переменных, быстрые действия |
+| Инструменты | Заголовок, описание, 4 карточки инструментов |
+| Генератор контента | Типы контента, 5 тонов, лейблы, плейсхолдеры, кнопки, пустое состояние |
+| Настройки | Все секции: профиль, тариф, безопасность, кнопки |
+| Чат | Новый чат, плейсхолдер, подсказка горячих клавиш, пустое состояние |
+
+`i18n.ts` расширен с ~60 до 130+ ключей переводов.
+
+### ✅ Мобильная адаптация Sidebar
+- **Desktop (md+):** фиксированный сайдбар 256px — без изменений
+- **Mobile:** сайдбар скрыт по умолчанию
+  - Мобильный top bar (h-14, тёмный) с логотипом и кнопкой-гамбургером — всегда виден
+  - Гамбургер открывает **drawer** (w-72) с анимацией slide-in 300ms
+  - Затемнённый overlay закрывает drawer по тапу
+  - Кнопка ✕ внутри drawer
+  - Клик по пункту меню автоматически закрывает drawer
+
+### ✅ Мобильная адаптация всех страниц
+Все аутентифицированные страницы (dashboard, chat, tools, writer, settings):
+- `ml-64` → `md:ml-64` — убран жёсткий отступ под сайдбар на мобиле
+- `pt-14 md:pt-0` — контент не перекрывается мобильным top bar
+- `p-8` → `p-4 md:p-8` — нормальные отступы на маленьких экранах
+- Заголовки адаптированы: `text-3xl` → `text-2xl md:text-3xl`
+- Статистические карточки: адаптивные размеры иконок и паддингов
+- Кнопки на мобиле переносятся вниз, не обрезаются
+
+### ✅ Прочие технические улучшения
+- Добавлена кириллическая подгрузка шрифта Inter (`subsets: ["latin", "cyrillic"]`) — корректное отображение русского текста
+- `viewport` вынесен из `metadata` в отдельный экспорт (фикс deprecated warning в Next.js 16)
+- Добавлен мета-тег viewport с `maximum-scale=1` для предотвращения zoom на мобиле
 
 ---
 
-## Project Structure
+## Функциональность приложения
+
+### Лендинг
+- Анимированный hero с градиентным текстом (Framer Motion)
+- Сетка фич с анимациями при скролле
+- Таблица тарифов (Free / Pro / Team) с выделенным планом
+- Полностью адаптивный дизайн
+
+### Аутентификация
+- Регистрация и вход по email + пароль
+- JWT в **httpOnly cookies** (защита от XSS)
+- Middleware защищает все маршруты `/dashboard`, `/chat`, `/tools`, `/settings`
+- Хэширование паролей через **bcryptjs** (cost factor 12)
+- Валидация всех API-запросов через Zod
+
+### AI Чат (стриминг)
+- Реальные стриминговые ответы от **Llama 3.1 8B** через Groq API
+- SSE (Server-Sent Events) — без polling
+- Мультичат: создание, переключение, история
+- Хранение чатов и сообщений в PostgreSQL
+- Индикатор набора с анимированными точками
+- Автоскролл к последнему сообщению
+- Автоматический заголовок из первого сообщения
+- **Удаление чатов** — иконка корзины при наведении
+- Предложенные промпты на пустом состоянии
+
+### Генератор контента
+- 4 типа контента: **Статья/Blog Post**, **Email**, **Соцсети**, **Код**
+- 5 тонов: Профессиональный, Повседневный, Дружелюбный, Убедительный, Информативный
+- Skeleton-лоадер во время генерации
+- Копирование в буфер одним кликом с подтверждением
+
+### Дашборд
+- Персональное приветствие
+- Стат-карточки: сообщения, генерации, тариф, активные дни
+- Прогресс-бар использования бесплатного плана
+- Быстрый доступ к инструментам
+
+### Настройки
+- Редактирование профиля
+- Отображение тарифа с CTA апгрейда
+- Секция безопасности
+
+### Переключатель языка
+- Переключение EN/RU в один клик
+- Сохранение выбора в localStorage
+- Встроен в навбар, сайдбар и страницы авторизации
+
+---
+
+## Стек технологий
+
+| Слой | Технология |
+|---|---|
+| Фреймворк | Next.js 16 (App Router) |
+| Язык | TypeScript 5 |
+| Стили | Tailwind CSS v4 |
+| Анимации | Framer Motion |
+| Иконки | Lucide React |
+| State | Zustand + persist middleware |
+| Валидация | Zod |
+| Авторизация | JWT + bcryptjs + httpOnly cookies |
+| AI | Groq API — Llama 3.1 8B Instant (free) |
+| ORM | Prisma v5 |
+| База данных | PostgreSQL (Neon serverless) |
+| Деплой | Vercel |
+
+---
+
+## Структура проекта
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                  # Landing page
+│   ├── page.tsx                  # Лендинг
 │   ├── layout.tsx                # Root layout
 │   ├── auth/
-│   │   ├── login/page.tsx        # Login form
-│   │   └── register/page.tsx     # Registration form
-│   ├── dashboard/page.tsx        # User dashboard with stats
-│   ├── chat/page.tsx             # AI Chat with streaming
+│   │   ├── login/page.tsx        # Форма входа
+│   │   └── register/page.tsx     # Форма регистрации
+│   ├── dashboard/page.tsx        # Дашборд со статистикой
+│   ├── chat/page.tsx             # AI Чат со стримингом
 │   ├── tools/
-│   │   ├── page.tsx              # Tools index
-│   │   └── writer/page.tsx       # Content generation
-│   ├── settings/page.tsx         # Account settings
+│   │   ├── page.tsx              # Каталог инструментов
+│   │   └── writer/page.tsx       # Генератор контента
+│   ├── settings/page.tsx         # Настройки аккаунта
 │   └── api/
 │       ├── auth/
-│       │   ├── login/route.ts    # POST: authenticate user
-│       │   ├── register/route.ts # POST: create account
-│       │   ├── logout/route.ts   # POST: clear cookie
-│       │   └── me/route.ts       # GET: current user + usage
-│       ├── chat/route.ts         # POST: stream AI response | GET: chat history
-│       └── generate/route.ts     # POST: one-shot content generation
+│       │   ├── login/route.ts    # POST: авторизация
+│       │   ├── register/route.ts # POST: регистрация
+│       │   ├── logout/route.ts   # POST: выход
+│       │   └── me/route.ts       # GET: текущий пользователь
+│       ├── chat/route.ts         # POST: стриминг AI | GET: история | DELETE: удаление
+│       └── generate/route.ts     # POST: генерация контента
 ├── components/
-│   └── layout/
-│       └── Sidebar.tsx           # App sidebar with navigation
+│   ├── layout/
+│   │   └── Sidebar.tsx           # Сайдбар (desktop + mobile drawer)
+│   └── LanguageToggle.tsx        # Компонент переключателя языка
 ├── lib/
-│   ├── auth.ts                   # JWT sign/verify, bcrypt, getCurrentUser
-│   ├── prisma.ts                 # Prisma client singleton
-│   └── utils.ts                  # cn() utility (clsx + tailwind-merge)
+│   ├── auth.ts                   # JWT, bcrypt, getCurrentUser
+│   ├── i18n.ts                   # 130+ ключей переводов EN/RU
+│   ├── prisma.ts                 # Prisma singleton
+│   └── utils.ts                  # cn() (clsx + tailwind-merge)
 ├── store/
-│   └── chat.ts                   # Zustand store for chat state
-└── middleware.ts                  # Route protection
+│   ├── chat.ts                   # Zustand: чаты, сообщения, стриминг
+│   └── language.ts               # Zustand: язык интерфейса (persist)
+└── middleware.ts                  # Защита маршрутов
 ```
 
 ---
 
-## Database Schema
+## Схема базы данных
 
 ```
-User         — id, name, email, password (bcrypt), plan, avatar
-Chat         — id, userId, title
-Message      — id, chatId, userId, role (user|assistant), content
-Usage        — id, userId, type, tokens, createdAt
+User     — id, name, email, password (bcrypt), plan, avatar, createdAt
+Chat     — id, userId, title, createdAt
+Message  — id, chatId, userId, role (user|assistant), content, createdAt
+Usage    — id, userId, type, tokens, createdAt
 ```
 
 ---
 
-## Getting Started
+## Запуск локально
 
 ```bash
-# 1. Clone the repo
+# 1. Клонировать репозиторий
 git clone https://github.com/subrosa5/aria.git
 cd aria
 
-# 2. Install dependencies
+# 2. Установить зависимости
 npm install
 
-# 3. Set up environment variables
+# 3. Настроить переменные окружения
 cp .env.example .env
-# Fill in DATABASE_URL, JWT_SECRET, GROQ_API_KEY
+# Заполнить DATABASE_URL, JWT_SECRET, GROQ_API_KEY
 
-# 4. Push database schema
+# 4. Применить схему БД
 npx prisma db push
 
-# 5. Start the dev server
+# 5. Запустить dev-сервер
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Открыть [http://localhost:3000](http://localhost:3000)
 
-### Environment Variables
+### Переменные окружения
 
-| Variable | Description |
+| Переменная | Описание |
 |---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `DIRECT_URL` | Direct DB URL for Prisma migrations |
-| `JWT_SECRET` | Secret for signing JWT tokens |
-| `GROQ_API_KEY` | Groq API key from console.groq.com (free) |
+| `DATABASE_URL` | PostgreSQL строка подключения |
+| `DIRECT_URL` | Прямое подключение для Prisma миграций |
+| `JWT_SECRET` | Секрет для подписи JWT-токенов |
+| `GROQ_API_KEY` | API-ключ Groq (console.groq.com, бесплатно) |
 
-> Without `GROQ_API_KEY` the app runs in **demo mode** — all UI works, AI returns a placeholder response.
+> Без `GROQ_API_KEY` приложение работает в **demo-режиме** — весь UI функционирует, AI возвращает заглушку.
 
 ---
 
-## Streaming Implementation
+## Стриминг: как работает
 
-The chat uses a custom SSE stream built with the Web `ReadableStream` API:
+Чат использует кастомный SSE-поток на базе Web `ReadableStream`:
 
 ```ts
-// Server sends events as: data: {"delta": "token"}\n\n
+// Сервер отправляет события: data: {"delta": "token"}\n\n
 const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 const stream = new ReadableStream({
   async start(controller) {
@@ -187,14 +254,14 @@ const stream = new ReadableStream({
 });
 ```
 
-The client reads the stream token by token and updates the Zustand store, causing React to re-render each new character in real time.
+Клиент читает поток токен за токеном и обновляет Zustand-стор — React перерисовывает каждый новый символ в реальном времени.
 
 ---
 
-## Deployment
+## Деплой
 
-Deployed on **Vercel** (Hobby plan, free).
-Database hosted on **Neon** (serverless PostgreSQL, free tier).
+Приложение задеплоено на **Vercel** (Hobby plan, бесплатно).
+База данных на **Neon** (serverless PostgreSQL, бесплатный тариф).
 
 ```bash
 npx vercel --prod

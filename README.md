@@ -76,7 +76,7 @@
 | State management | Zustand |
 | Validation | Zod |
 | Auth | JWT + bcryptjs + httpOnly cookies |
-| AI | Anthropic Claude API (claude-sonnet-4-6) |
+| AI | Groq API — Llama 3.1 8B Instant (free tier) |
 | ORM | Prisma v5 |
 | Database | PostgreSQL (Neon serverless) |
 | Deployment | Vercel |
@@ -144,7 +144,7 @@ npm install
 
 # 3. Set up environment variables
 cp .env.example .env
-# Fill in DATABASE_URL, JWT_SECRET, ANTHROPIC_API_KEY
+# Fill in DATABASE_URL, JWT_SECRET, GROQ_API_KEY
 
 # 4. Push database schema
 npx prisma db push
@@ -162,9 +162,9 @@ Open [http://localhost:3000](http://localhost:3000)
 | `DATABASE_URL` | PostgreSQL connection string |
 | `DIRECT_URL` | Direct DB URL for Prisma migrations |
 | `JWT_SECRET` | Secret for signing JWT tokens |
-| `ANTHROPIC_API_KEY` | Claude API key from console.anthropic.com |
+| `GROQ_API_KEY` | Groq API key from console.groq.com (free) |
 
-> Without `ANTHROPIC_API_KEY` the app runs in **demo mode** — all UI works, AI returns a placeholder response.
+> Without `GROQ_API_KEY` the app runs in **demo mode** — all UI works, AI returns a placeholder response.
 
 ---
 
@@ -174,10 +174,12 @@ The chat uses a custom SSE stream built with the Web `ReadableStream` API:
 
 ```ts
 // Server sends events as: data: {"delta": "token"}\n\n
+const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 const stream = new ReadableStream({
   async start(controller) {
-    for await (const chunk of anthropic.messages.stream(...)) {
-      controller.enqueue(encode(`data: ${JSON.stringify({ delta: chunk.text })}\n\n`));
+    const result = streamText({ model: groq("llama-3.1-8b-instant"), messages });
+    for await (const delta of (await result).textStream) {
+      controller.enqueue(encode(`data: ${JSON.stringify({ delta })}\n\n`));
     }
     controller.enqueue(encode("data: [DONE]\n\n"));
     controller.close();

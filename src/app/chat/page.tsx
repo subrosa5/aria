@@ -116,7 +116,7 @@ export default function ChatPage() {
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
-      <div className="ml-64 flex flex-1">
+      <div className="md:ml-64 flex flex-1 pt-14 md:pt-0">
         {/* Chat list */}
         <div className="w-60 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0">
           <div className="p-4 border-b border-slate-100">

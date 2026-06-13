@@ -5,6 +5,18 @@ import { Sparkles, Zap, Shield, BarChart3, MessageSquare, FileText, Code2, Chevr
 import { useLanguageStore } from "@/store/language";
 import { translations } from "@/lib/i18n";
 
+function LangToggle() {
+  const { lang, toggle } = useLanguageStore();
+  return (
+    <button onClick={toggle}
+      className="flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-violet-600 transition-colors px-2 py-1 rounded-lg hover:bg-violet-50">
+      <span className={lang === "en" ? "text-violet-600" : ""}>EN</span>
+      <span className="text-slate-300 select-none">|</span>
+      <span className={lang === "ru" ? "text-violet-600" : ""}>RU</span>
+    </button>
+  );
+}
+
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.1, duration: 0.5 } }),
@@ -61,6 +73,7 @@ export default function LandingPage() {
             <a href="#features" className="hover:text-slate-900 transition-colors">{t.land_features}</a>
             <a href="#pricing" className="hover:text-slate-900 transition-colors">{t.land_pricing}</a>
             <Link href="/auth/login" className="hover:text-slate-900 transition-colors">{t.land_signin}</Link>
+            <LangToggle />
           </div>
           <Link href="/auth/register" className="bg-violet-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-violet-700 transition-colors flex items-center gap-2">
             {t.land_getstarted} <ArrowRight className="w-4 h-4" />

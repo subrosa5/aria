@@ -38,9 +38,15 @@ export default function ChatPage() {
     const assistantMsg = { id: `a-${Date.now()}`, role: "assistant" as const, content: "", createdAt: new Date() };
 
     let chatId = activeChatId?.startsWith("temp-") ? null : activeChatId;
+    let tempChatId: string | null = null;
 
     if (!activeChatId) {
-      addChat({ id: `temp-${Date.now()}`, title: content.slice(0, 30), messages: [userMsg, assistantMsg] });
+      tempChatId = `temp-${Date.now()}`;
+      addChat({ id: tempChatId, title: content.slice(0, 30), messages: [userMsg, assistantMsg] });
+    } else if (activeChatId.startsWith("temp-")) {
+      tempChatId = activeChatId;
+      addMessage(activeChatId, userMsg);
+      addMessage(activeChatId, assistantMsg);
     } else {
       addMessage(activeChatId, userMsg);
       addMessage(activeChatId, assistantMsg);
@@ -74,14 +80,14 @@ export default function ChatPage() {
             const json = JSON.parse(data);
             if (json.chatId && !realChatId) {
               realChatId = json.chatId;
-              if (activeChatId?.startsWith("temp-")) {
+              if (tempChatId) {
                 setChats(useChatStore.getState().chats.map(c =>
-                  c.id === activeChatId ? { ...c, id: json.chatId } : c
+                  c.id === tempChatId ? { ...c, id: json.chatId } : c
                 ));
                 setActiveChat(json.chatId);
               }
             }
-            if (json.delta) { currentContent += json.delta; updateLastMessage(realChatId || activeChatId!, currentContent); }
+            if (json.delta) { currentContent += json.delta; updateLastMessage(realChatId || tempChatId || activeChatId!, currentContent); }
             if (json.title && realChatId) updateChatTitle(realChatId, json.title);
           } catch {}
         }

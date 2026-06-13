@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import Anthropic from "@anthropic-ai/sdk";
+import { createGroq } from "@ai-sdk/groq";
+import { streamText } from "ai";
 
 export const dynamic = "force-dynamic";
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -31,31 +30,29 @@ export async function POST(req: NextRequest) {
 
       let fullContent = "";
       try {
-        const apiKey = process.env.ANTHROPIC_API_KEY;
-        if (!apiKey || apiKey === "your-anthropic-api-key-here") {
-          const demo = "I'm Aria, your AI assistant! To enable real AI responses, please add your Anthropic API key to the environment variables. For now, I'm running in demo mode.";
+        const groqKey = process.env.GROQ_API_KEY;
+        if (!groqKey || groqKey === "your-groq-api-key-here") {
+          const demo = "Hi! I'm Aria. To enable real AI responses, add your GROQ_API_KEY (free at console.groq.com). Currently running in demo mode.";
           for (const char of demo) {
             fullContent += char;
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta: char })}\n\n`));
-            await new Promise((r) => setTimeout(r, 10));
+            await new Promise((r) => setTimeout(r, 12));
           }
         } else {
-          const response = await client.messages.stream({
-            model: "claude-sonnet-4-6",
-            max_tokens: 1024,
-            system: "You are Aria, a helpful AI assistant. Be concise, friendly, and professional.",
+          const groq = createGroq({ apiKey: groqKey });
+          const result = streamText({
+            model: groq("llama-3.1-8b-instant"),
+            system: "You are Aria, a helpful and friendly AI assistant. Be concise and professional.",
             messages: messages.map((m: { role: string; content: string }) => ({
               role: m.role as "user" | "assistant",
               content: m.content,
             })),
+            maxOutputTokens: 1024,
           });
 
-          for await (const chunk of response) {
-            if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-              const text = chunk.delta.text;
-              fullContent += text;
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta: text })}\n\n`));
-            }
+          for await (const delta of (await result).textStream) {
+            fullContent += delta;
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta })}\n\n`));
           }
         }
 

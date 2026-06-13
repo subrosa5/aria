@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import Anthropic from "@anthropic-ai/sdk";
+import { createGroq } from "@ai-sdk/groq";
+import { generateText } from "ai";
 import { z } from "zod";
 
 const schema = z.object({
@@ -27,23 +28,22 @@ export async function POST(req: NextRequest) {
 
   const { type, prompt, tone } = result.data;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || apiKey === "your-anthropic-api-key-here") {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey || groqKey === "your-groq-api-key-here") {
     return NextResponse.json({
-      result: `[Demo Mode] Generated ${type} content for: "${prompt}"\n\nTo enable real AI generation, add your ANTHROPIC_API_KEY to environment variables.\n\nThis is a placeholder showing where AI-generated content would appear. The actual integration uses Claude claude-sonnet-4-6 via streaming API.`,
+      result: `[Demo Mode] Generated ${type} content for: "${prompt}"\n\nAdd your free GROQ_API_KEY from console.groq.com to enable real AI generation.`,
     });
   }
 
-  const client = new Anthropic({ apiKey });
+  const groq = createGroq({ apiKey: groqKey });
   const systemPrompt = prompts[type] + (tone ? ` Tone: ${tone}.` : "");
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 2048,
-    messages: [{ role: "user", content: `${systemPrompt}\n\n${prompt}` }],
+  const { text: content } = await generateText({
+    model: groq("llama-3.1-8b-instant"),
+    system: systemPrompt,
+    prompt,
+    maxOutputTokens: 2048,
   });
-
-  const content = message.content[0].type === "text" ? message.content[0].text : "";
 
   await prisma.usage.create({ data: { userId: user.id, type, tokens: content.length } });
 

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.84",
+    "@ai-sdk/groq": "^3.0.41",
     "@anthropic-ai/sdk": "^0.104.1",
     "@prisma/client": "^5.22.0",
     "@types/bcryptjs": "^2.4.6",

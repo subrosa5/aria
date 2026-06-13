@@ -3,17 +3,21 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Sparkles, MessageSquare, FileText, LayoutDashboard, Settings, LogOut, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const nav = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/chat", icon: MessageSquare, label: "AI Chat" },
-  { href: "/tools", icon: FileText, label: "Tools" },
-  { href: "/settings", icon: Settings, label: "Settings" },
-];
+import { useLanguageStore } from "@/store/language";
+import { translations } from "@/lib/i18n";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { lang } = useLanguageStore();
+  const t = translations[lang];
+
+  const nav = [
+    { href: "/dashboard", icon: LayoutDashboard, label: t.nav_dashboard },
+    { href: "/chat", icon: MessageSquare, label: t.nav_chat },
+    { href: "/tools", icon: FileText, label: t.nav_tools },
+    { href: "/settings", icon: Settings, label: t.nav_settings },
+  ];
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -50,7 +54,7 @@ export default function Sidebar() {
       <div className="p-4 border-t border-slate-800">
         <button onClick={logout}
           className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-red-400 transition-all">
-          <LogOut className="w-5 h-5" /> Sign out
+          <LogOut className="w-5 h-5" /> {t.nav_signout}
         </button>
       </div>
     </aside>

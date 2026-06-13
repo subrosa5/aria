@@ -2,33 +2,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Sparkles, Zap, Shield, BarChart3, MessageSquare, FileText, Code2, ChevronRight, Check, ArrowRight } from "lucide-react";
-
-const features = [
-  { icon: MessageSquare, title: "AI Chat", desc: "Stream responses in real-time. Context-aware conversations with memory." },
-  { icon: FileText, title: "Content Writer", desc: "Blog posts, emails, social media — generated in seconds." },
-  { icon: Code2, title: "Code Assistant", desc: "Write, review, and debug code with AI-powered suggestions." },
-  { icon: BarChart3, title: "Usage Analytics", desc: "Track your AI usage, token consumption, and productivity gains." },
-  { icon: Zap, title: "Lightning Fast", desc: "Optimized streaming for near-instant responses, no waiting." },
-  { icon: Shield, title: "Secure by Default", desc: "End-to-end encryption. Your data stays private, always." },
-];
-
-const plans = [
-  {
-    name: "Free", price: "$0", period: "/month", desc: "Perfect to get started",
-    features: ["50 AI messages/month", "3 content generations", "Basic chat history", "Email support"],
-    cta: "Get started free", href: "/auth/register", highlighted: false,
-  },
-  {
-    name: "Pro", price: "$19", period: "/month", desc: "For power users",
-    features: ["Unlimited AI messages", "Unlimited generations", "Full chat history", "Priority support", "API access", "Custom instructions"],
-    cta: "Start Pro trial", href: "/auth/register", highlighted: true,
-  },
-  {
-    name: "Team", price: "$49", period: "/month", desc: "For growing teams",
-    features: ["Everything in Pro", "Up to 10 members", "Shared workspaces", "Admin dashboard", "SSO / SAML", "SLA guarantee"],
-    cta: "Contact sales", href: "/auth/register", highlighted: false,
-  },
-];
+import { useLanguageStore } from "@/store/language";
+import { translations } from "@/lib/i18n";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -36,6 +11,42 @@ const fadeUp = {
 };
 
 export default function LandingPage() {
+  const { lang } = useLanguageStore();
+  const t = translations[lang];
+
+  const features = [
+    { icon: MessageSquare, title: "AI Chat", desc: lang === "en" ? "Stream responses in real-time. Context-aware conversations with memory." : "Ответы в реальном времени. Контекстные диалоги с памятью." },
+    { icon: FileText, title: lang === "en" ? "Content Writer" : "Генератор контента", desc: lang === "en" ? "Blog posts, emails, social media — generated in seconds." : "Посты, письма, соцсети — за секунды." },
+    { icon: Code2, title: lang === "en" ? "Code Assistant" : "Помощник по коду", desc: lang === "en" ? "Write, review, and debug code with AI-powered suggestions." : "Пишите, проверяйте и отлаживайте код с помощью ИИ." },
+    { icon: BarChart3, title: lang === "en" ? "Usage Analytics" : "Аналитика", desc: lang === "en" ? "Track your AI usage, token consumption, and productivity gains." : "Отслеживайте использование ИИ и рост продуктивности." },
+    { icon: Zap, title: lang === "en" ? "Lightning Fast" : "Молниеносно", desc: lang === "en" ? "Optimized streaming for near-instant responses, no waiting." : "Оптимизированный стриминг без задержек." },
+    { icon: Shield, title: lang === "en" ? "Secure by Default" : "Безопасность", desc: lang === "en" ? "End-to-end encryption. Your data stays private, always." : "Шифрование данных. Ваша информация всегда приватна." },
+  ];
+
+  const plans = [
+    {
+      name: t.plan_free, price: "$0", period: lang === "en" ? "/month" : "/мес", desc: lang === "en" ? "Perfect to get started" : "Идеально для старта",
+      features: lang === "en"
+        ? ["50 AI messages/month", "3 content generations", "Basic chat history", "Email support"]
+        : ["50 сообщений ИИ/мес", "3 генерации контента", "История чатов", "Поддержка по email"],
+      cta: t.plan_free_cta, href: "/auth/register", highlighted: false,
+    },
+    {
+      name: t.plan_pro, price: "$19", period: lang === "en" ? "/month" : "/мес", desc: lang === "en" ? "For power users" : "Для профессионалов",
+      features: lang === "en"
+        ? ["Unlimited AI messages", "Unlimited generations", "Full chat history", "Priority support", "API access", "Custom instructions"]
+        : ["Безлимитные сообщения ИИ", "Безлимитные генерации", "Полная история чатов", "Приоритетная поддержка", "Доступ к API", "Кастомные инструкции"],
+      cta: t.plan_pro_cta, href: "/auth/register", highlighted: true,
+    },
+    {
+      name: t.plan_team, price: "$49", period: lang === "en" ? "/month" : "/мес", desc: lang === "en" ? "For growing teams" : "Для команд",
+      features: lang === "en"
+        ? ["Everything in Pro", "Up to 10 members", "Shared workspaces", "Admin dashboard", "SSO / SAML", "SLA guarantee"]
+        : ["Всё из Про", "До 10 участников", "Общие рабочие пространства", "Панель администратора", "SSO / SAML", "Гарантия SLA"],
+      cta: t.plan_team_cta, href: "/auth/register", highlighted: false,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
@@ -47,12 +58,12 @@ export default function LandingPage() {
             <span className="text-xl font-bold text-slate-900">Aria</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#features" className="hover:text-slate-900 transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-slate-900 transition-colors">Pricing</a>
-            <Link href="/auth/login" className="hover:text-slate-900 transition-colors">Sign in</Link>
+            <a href="#features" className="hover:text-slate-900 transition-colors">{t.land_features}</a>
+            <a href="#pricing" className="hover:text-slate-900 transition-colors">{t.land_pricing}</a>
+            <Link href="/auth/login" className="hover:text-slate-900 transition-colors">{t.land_signin}</Link>
           </div>
           <Link href="/auth/register" className="bg-violet-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-violet-700 transition-colors flex items-center gap-2">
-            Get started <ArrowRight className="w-4 h-4" />
+            {t.land_getstarted} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </nav>
@@ -61,30 +72,30 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
             className="inline-flex items-center gap-2 bg-violet-50 text-violet-700 text-sm font-medium px-4 py-2 rounded-full mb-8 border border-violet-100">
-            <Sparkles className="w-4 h-4" /> Powered by Claude AI
+            <Sparkles className="w-4 h-4" /> Powered by Groq AI
           </motion.div>
 
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
             className="text-6xl md:text-7xl font-extrabold text-slate-900 leading-tight tracking-tight mb-6">
-            Your AI workspace,{" "}
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent">reimagined</span>
+            {t.land_hero_title1}{" "}
+            <span className="bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent">{t.land_hero_title2}</span>
           </motion.h1>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}
             className="text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Chat, write, and code with the power of AI. Aria brings together everything you need to work smarter in one beautifully designed workspace.
+            {t.land_hero_sub}
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/register" className="bg-violet-600 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-violet-700 transition-all hover:shadow-lg hover:shadow-violet-200 flex items-center justify-center gap-2 text-base">
-              Start for free <ArrowRight className="w-5 h-5" />
+              {t.land_hero_cta} <ArrowRight className="w-5 h-5" />
             </Link>
             <Link href="/auth/login" className="bg-slate-50 text-slate-700 font-semibold px-8 py-4 rounded-2xl hover:bg-slate-100 transition-colors border border-slate-200 text-base">
-              Sign in
+              {t.land_signin}
             </Link>
           </motion.div>
-          <p className="text-sm text-slate-400 mt-6">No credit card required · 50 free messages/month</p>
+          <p className="text-sm text-slate-400 mt-6">{lang === "en" ? "No credit card required · 50 free messages/month" : "Без карты · 50 бесплатных сообщений/мес"}</p>
 
           <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="mt-16 relative">
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-1 shadow-2xl shadow-slate-300">
@@ -98,7 +109,7 @@ export default function LandingPage() {
                 <div className="space-y-4">
                   <div className="flex justify-end">
                     <div className="bg-violet-600 text-white text-sm px-4 py-3 rounded-2xl rounded-br-sm max-w-xs">
-                      Write a landing page copy for a SaaS product
+                      {lang === "en" ? "Write a landing page copy for a SaaS product" : "Напиши текст для лендинга SaaS-продукта"}
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -107,9 +118,15 @@ export default function LandingPage() {
                     </div>
                     <div className="bg-slate-800 text-slate-200 text-sm px-4 py-3 rounded-2xl rounded-tl-sm max-w-md">
                       <span className="text-violet-400 font-semibold">Aria</span><br />
-                      Here is a compelling landing page copy:<br /><br />
-                      <span className="text-white font-semibold">Transform how your team works.</span>
-                      <br /><span className="text-slate-300">Stop juggling tools. Start shipping faster with the all-in-one platform...</span>
+                      {lang === "en" ? (
+                        <>Here is a compelling landing page copy:<br /><br />
+                        <span className="text-white font-semibold">Transform how your team works.</span>
+                        <br /><span className="text-slate-300">Stop juggling tools. Start shipping faster with the all-in-one platform...</span></>
+                      ) : (
+                        <>Вот убедительный текст для лендинга:<br /><br />
+                        <span className="text-white font-semibold">Измените способ работы вашей команды.</span>
+                        <br /><span className="text-slate-300">Перестаньте переключаться между инструментами. Работайте быстрее...</span></>
+                      )}
                       <span className="inline-block w-0.5 h-4 bg-violet-400 ml-1 animate-pulse" />
                     </div>
                   </div>
@@ -124,8 +141,8 @@ export default function LandingPage() {
       <section id="features" className="py-24 px-6 bg-slate-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Everything you need to work smarter</h2>
-            <p className="text-lg text-slate-500 max-w-xl mx-auto">Aria brings together powerful AI tools in one clean, fast interface.</p>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">{t.land_features_title}</h2>
+            <p className="text-lg text-slate-500 max-w-xl mx-auto">{t.land_features_sub}</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
@@ -145,15 +162,17 @@ export default function LandingPage() {
       <section id="pricing" className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Simple, transparent pricing</h2>
-            <p className="text-lg text-slate-500">Start free. Upgrade when you need more.</p>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">{t.land_pricing_title}</h2>
+            <p className="text-lg text-slate-500">{t.land_pricing_sub}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {plans.map((plan, i) => (
               <motion.div key={plan.name} custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp}
                 className={`rounded-2xl p-8 border-2 relative ${plan.highlighted ? "border-violet-500 bg-gradient-to-b from-violet-600 to-indigo-700 text-white shadow-xl shadow-violet-200" : "border-slate-100 bg-white"}`}>
                 {plan.highlighted && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-4 py-1.5 rounded-full">MOST POPULAR</div>
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-4 py-1.5 rounded-full">
+                    {lang === "en" ? "MOST POPULAR" : "ПОПУЛЯРНЫЙ"}
+                  </div>
                 )}
                 <div className="mb-6">
                   <h3 className={`text-lg font-bold mb-1 ${plan.highlighted ? "text-white" : "text-slate-900"}`}>{plan.name}</h3>
@@ -183,10 +202,10 @@ export default function LandingPage() {
       <section className="py-24 px-6 bg-gradient-to-br from-violet-600 to-indigo-700">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <h2 className="text-4xl font-bold text-white mb-4">Ready to work smarter?</h2>
-            <p className="text-violet-200 text-lg mb-8">Join thousands of professionals using Aria to 10x their productivity.</p>
+            <h2 className="text-4xl font-bold text-white mb-4">{t.land_cta_title}</h2>
+            <p className="text-violet-200 text-lg mb-8">{t.land_cta_sub}</p>
             <Link href="/auth/register" className="inline-flex items-center gap-2 bg-white text-violet-700 font-bold px-8 py-4 rounded-2xl hover:bg-violet-50 transition-colors text-base">
-              Get started for free <ArrowRight className="w-5 h-5" />
+              {t.land_cta_btn} <ArrowRight className="w-5 h-5" />
             </Link>
           </motion.div>
         </div>
@@ -200,10 +219,10 @@ export default function LandingPage() {
             </div>
             <span className="text-white font-semibold">Aria</span>
           </div>
-          <p className="text-sm">© 2024 Aria. Built with Next.js and Claude AI.</p>
+          <p className="text-sm">{t.land_footer}</p>
           <div className="flex gap-6 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <a href="#" className="hover:text-white transition-colors">{lang === "en" ? "Privacy" : "Конфиденциальность"}</a>
+            <a href="#" className="hover:text-white transition-colors">{lang === "en" ? "Terms" : "Условия"}</a>
           </div>
         </div>
       </footer>

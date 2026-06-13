@@ -5,9 +5,13 @@ import { useChatStore } from "@/store/chat";
 import { Send, Plus, Sparkles, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useLanguageStore } from "@/store/language";
+import { translations } from "@/lib/i18n";
 
 export default function ChatPage() {
   const { chats, activeChatId, isStreaming, setChats, setActiveChat, addChat, addMessage, updateLastMessage, setStreaming, updateChatTitle, deleteChat } = useChatStore();
+  const { lang } = useLanguageStore();
+  const t = translations[lang];
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -117,7 +121,7 @@ export default function ChatPage() {
         <div className="w-60 bg-white border-r border-slate-100 flex flex-col h-screen sticky top-0">
           <div className="p-4 border-b border-slate-100">
             <button onClick={newChat} className="w-full flex items-center gap-2 bg-violet-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors">
-              <Plus className="w-4 h-4" /> New Chat
+              <Plus className="w-4 h-4" /> {t.chat_new}
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-hide">
@@ -145,8 +149,8 @@ export default function ChatPage() {
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-8 h-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">How can I help you?</h2>
-                <p className="text-slate-500 text-sm max-w-xs">Ask me anything — I can write, code, analyze, and more.</p>
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">{t.chat_empty_title}</h2>
+                <p className="text-slate-500 text-sm max-w-xs">{t.chat_empty_sub}</p>
                 <div className="mt-6 flex flex-wrap gap-2 justify-center max-w-sm">
                   {["Write a blog post", "Debug my code", "Explain a concept", "Draft an email"].map(s => (
                     <button key={s} onClick={() => setInput(s)}
@@ -187,14 +191,14 @@ export default function ChatPage() {
           <div className="p-4 border-t border-slate-100 bg-white">
             <div className="max-w-3xl mx-auto flex gap-3 items-end">
               <textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKeyDown}
-                placeholder="Message Aria..." rows={1}
+                placeholder={t.chat_placeholder} rows={1}
                 className="flex-1 border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none max-h-32 scrollbar-hide" />
               <button onClick={send} disabled={!input.trim() || isStreaming}
                 className="w-10 h-10 bg-violet-600 text-white rounded-xl flex items-center justify-center hover:bg-violet-700 transition-colors disabled:opacity-40 flex-shrink-0">
                 <Send className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-center text-xs text-slate-400 mt-2">Press Enter to send · Shift+Enter for new line</p>
+            <p className="text-center text-xs text-slate-400 mt-2">{t.chat_hint}</p>
           </div>
         </div>
       </div>

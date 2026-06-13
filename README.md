@@ -10,6 +10,7 @@ A production-ready SaaS platform for AI-powered productivity. Chat with LLMs in 
 ![Prisma](https://img.shields.io/badge/Prisma-5-2d3748?style=flat-square&logo=prisma)
 ![Groq](https://img.shields.io/badge/Groq-Llama_3.1-orange?style=flat-square)
 ![Vercel](https://img.shields.io/badge/Vercel-Deployed-black?style=flat-square&logo=vercel)
+![Tests](https://img.shields.io/badge/Tests-39%20passed-brightgreen?style=flat-square&logo=vitest)
 
 ---
 
@@ -168,6 +169,27 @@ model Usage {
   user      User     @relation(fields: [userId], references: [id])
 }
 ```
+
+---
+
+## Testing
+
+```bash
+npm test          # run all tests once
+npm run test:watch  # watch mode
+```
+
+**39 tests across 5 suites:**
+
+| Suite | Coverage |
+|---|---|
+| `src/lib/auth.test.ts` | `signToken`, `verifyToken` (valid, tampered, invalid), `hashPassword`, `comparePassword` (correct, wrong, salt uniqueness) |
+| `src/store/chat.test.ts` | `addChat`, `addMessage`, `updateLastMessage`, `deleteChat` (active reassignment, null fallback), `setStreaming`, `updateChatTitle` |
+| `src/app/api/auth/login/route.test.ts` | 400 on invalid input, 401 on unknown user, 401 on wrong password, 200 + httpOnly cookie on success |
+| `src/app/api/auth/register/route.test.ts` | 400 on bad fields, 409 on duplicate email, 200 + cookie on success, password hash not exposed in response |
+| `src/components/layout/Sidebar.test.tsx` | Nav links render, brand logo, sign out button, hamburger opens mobile drawer, language toggle visible |
+
+**Stack:** Vitest + Testing Library + jsdom
 
 ---
 

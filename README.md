@@ -11,6 +11,7 @@ A production-ready SaaS platform for AI-powered productivity. Chat with LLMs in 
 ![Groq](https://img.shields.io/badge/Groq-Llama_3.1-orange?style=flat-square)
 ![Vercel](https://img.shields.io/badge/Vercel-Deployed-black?style=flat-square&logo=vercel)
 ![Tests](https://img.shields.io/badge/Tests-39%20passed-brightgreen?style=flat-square&logo=vitest)
+![CI](https://github.com/subrosa5/aria/actions/workflows/ci.yml/badge.svg)
 
 ---
 

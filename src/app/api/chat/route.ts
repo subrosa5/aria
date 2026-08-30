@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createGroq } from "@ai-sdk/groq";
 import { streamText } from "ai";
 
@@ -9,6 +10,14 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const rateLimit = await checkRateLimit(user.id);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests, please try again later" },
+      { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+    );
+  }
 
   const { messages, chatId } = await req.json();
 

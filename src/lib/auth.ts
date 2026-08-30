@@ -7,12 +7,20 @@ import { cookies } from "next/headers";
 // из открытого репозитория. Любой мог бы подделать валидный токен для
 // любого пользователя. Теперь падаем громко при старте, а не тихо остаёмся
 // уязвимыми в проде.
-const SECRET = process.env.JWT_SECRET;
-if (!SECRET) {
-  throw new Error(
-    "JWT_SECRET is not set. Refusing to start with an insecure default secret."
-  );
-}
+// IIFE, а не просто `const SECRET = process.env.JWT_SECRET; if (!SECRET) throw`:
+// TypeScript не протаскивает сужение типа (string | undefined -> string) через
+// границу функции в signToken/verifyToken ниже — они видели бы SECRET снова
+// как string | undefined. Внутри своей же функции сужение работает нормально,
+// а наружу IIFE возвращает уже точно string.
+const SECRET: string = (() => {
+  const value = process.env.JWT_SECRET;
+  if (!value) {
+    throw new Error(
+      "JWT_SECRET is not set. Refusing to start with an insecure default secret."
+    );
+  }
+  return value;
+})();
 
 export interface JWTPayload {
   id: string;

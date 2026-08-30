@@ -51,6 +51,7 @@ describe("POST /api/auth/register", () => {
       plan: "FREE",
       avatar: null,
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const res = await POST(makeRequest(validBody));
@@ -69,6 +70,7 @@ describe("POST /api/auth/register", () => {
       plan: "FREE",
       avatar: null,
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const res = await POST(makeRequest(validBody));
@@ -88,6 +90,7 @@ describe("POST /api/auth/register", () => {
       plan: "FREE",
       avatar: null,
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const res = await POST(makeRequest(validBody));
@@ -105,6 +108,7 @@ describe("POST /api/auth/register", () => {
       plan: "FREE",
       avatar: null,
       createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     const res = await POST(makeRequest(validBody));

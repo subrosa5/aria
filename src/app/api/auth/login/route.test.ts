@@ -21,6 +21,7 @@ const mockUser = async (password: string) => ({
   plan: "FREE",
   avatar: null,
   createdAt: new Date(),
+  updatedAt: new Date(),
 });
 
 const makeRequest = (body: object) =>

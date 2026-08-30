@@ -12,8 +12,19 @@ export async function POST(req: NextRequest) {
 
   const { messages, chatId } = await req.json();
 
+  // IDOR: раньше chatId от клиента использовался напрямую, без проверки, что
+  // этот чат вообще принадлежит текущему пользователю. Любой залогиненный
+  // пользователь мог подставить чужой chatId и дописывать сообщения в чужой
+  // чат. DELETE-хендлер ниже эту проверку уже делал — тут её просто не было.
   let activeChatId = chatId;
-  if (!activeChatId) {
+  if (activeChatId) {
+    const existing = await prisma.chat.findFirst({
+      where: { id: activeChatId, userId: user.id },
+    });
+    if (!existing) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+  } else {
     const chat = await prisma.chat.create({ data: { userId: user.id, title: "New Chat" } });
     activeChatId = chat.id;
   }

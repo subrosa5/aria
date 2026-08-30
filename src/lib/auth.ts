@@ -2,7 +2,17 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
-const SECRET = process.env.JWT_SECRET || "fallback-secret";
+// Раньше здесь был `|| "fallback-secret"` — если JWT_SECRET не задан в
+// окружении, приложение молча подписывало токены публично известной строкой
+// из открытого репозитория. Любой мог бы подделать валидный токен для
+// любого пользователя. Теперь падаем громко при старте, а не тихо остаёмся
+// уязвимыми в проде.
+const SECRET = process.env.JWT_SECRET;
+if (!SECRET) {
+  throw new Error(
+    "JWT_SECRET is not set. Refusing to start with an insecure default secret."
+  );
+}
 
 export interface JWTPayload {
   id: string;
